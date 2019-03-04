@@ -1,0 +1,34 @@
+{
+    "name": "wizaplace/collection-diff",
+    "description": "",
+    "type": "library",
+    "homepage": "https://github.com/wizaplace/collection-diff",
+    "require": {
+        "php": "^7.1",
+        "symfony/serializer": "^4.2"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^2.14",
+        "phpstan/phpstan": "^0.11.2",
+        "phpunit/phpunit": "^8.0",
+        "tracy/tracy": "^2.6"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Wizaplace",
+            "email": "dev@wizaplace.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-4": {
+            "Wizaplace\\CollectionDiff\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Wizaplace\\Test\\CollectionDiff\\": "tests/"
+        }
+    }
+}
