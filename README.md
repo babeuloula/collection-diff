@@ -1,17 +1,18 @@
-# Upinde
+# Collection Diff
 
-TODO
+Collection Diff allows you to compare 2 arrays (of arrays or objects) to see if you should make INSERT, UPDATE or DELETE
+in your SQL tables.
 
 
 ## Requirements
 
-- PHP 7.0
+- PHP 7.1
 
 
 ## Installation
 
 ```
-composer install wizaplace/upinde
+composer install wizaplace/collection-diff
 ```
 
 
@@ -22,35 +23,44 @@ composer install wizaplace/upinde
 
 // From your database
 $from = [
-    new RandomObject("foo", 10.5),
-    new RandomObject("bar", 9.5),
-    new RandomObject("barFoo", 9.5),
-    new RandomObject("barFooBar", 9.5),
+    new RandomObject("foo", "category1", 10.5),
+    new RandomObject("bar2", "category2", 9.5),
+    new RandomObject("bar1", "category1", 9.5),
+    new RandomObject("barFoo", "category1", 9.5),
+    new RandomObject("barFooBar", "category1", 9.5),
 ];
 
 // From you form like $_POST
 $to = [
     [
         "name" => "foo",
+        "category" => "category1",
         "price" => 11.5
     ],
     [
-        "name" => "bar",
+        "name" => "bar2",
+        "category" => "category2",
+        "price" => 9.5,
+    ],
+    [
+        "name" => "bar1",
+        "category" => "category2",
         "price" => 9.5,
     ],
     [
         "name" => "fooBar",
+        "category" => "category3",
         "price" => 8.5,
     ],
 ];
 
-$upinde = new \Wizaplace\Upinde\Upinde('name', $from, $to);
+$collectionDiff = new \Wizaplace\CollectionDiff\CollectionDiff(['name', 'category'], $from, $to);
 
-$upinde->getQueries();
+$collectionDiff->getQueries();
 
 // Or
-$upinde->getNothing();
-$upinde->getInsert();
-$upinde->getUpdate();
-$upinde->getDelete();
+$collectionDiff->getNothing();
+$collectionDiff->getInsert();
+$collectionDiff->getUpdate();
+$collectionDiff->getDelete();
 ```
