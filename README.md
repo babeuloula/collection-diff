@@ -54,13 +54,10 @@ $to = [
     ],
 ];
 
-$collectionDiff = new \Wizaplace\CollectionDiff\CollectionDiff(['name', 'category'], $from, $to);
-
-// You can inject your own Normalizers
-$collectionDiff->setNormalizers([
-    new RandomNormalizer(),
-    new AnOtherNormalizer(),
-]);
+$collectionDiff = new \Wizaplace\CollectionDiff\CollectionDiff([
+   new RandomNormalizer(),
+   new AnOtherNormalizer(),
+], ['name', 'category'], $from, $to);
 
 $collectionDiff->getQueries();
 

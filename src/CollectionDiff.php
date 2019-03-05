@@ -10,9 +10,7 @@ declare(strict_types=1);
 namespace Wizaplace\CollectionDiff;
 
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
-use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
 use Symfony\Component\Serializer\Serializer;
-use Symfony\Component\Serializer\SerializerInterface;
 
 class CollectionDiff
 {
@@ -38,19 +36,20 @@ class CollectionDiff
         'defaultCompare' => 'todo',
     ];
 
-    /** @var SerializerInterface */
+    /** @var Serializer */
     private $serializer;
 
     /** @var bool */
     private $isAlreadyCompared = false;
 
     /**
-     * @param string|array $primaryKeys
-     * @param array        $from
-     * @param array        $to
-     * @param array        $options
+     * @param NormalizerInterface[] $normalizers
+     * @param string|array          $primaryKeys
+     * @param array                 $from
+     * @param array                 $to
+     * @param array                 $options
      */
-    public function __construct($primaryKeys, array $from, array $to, array $options = [])
+    public function __construct(array $normalizers, $primaryKeys, array $from, array $to, array $options = [])
     {
         $this->resetQueries();
 
@@ -61,11 +60,11 @@ class CollectionDiff
 
         $this->options = array_merge($this->options, $options);
 
-        $this->serializer = new Serializer([new PropertyNormalizer()]);
+        $this->serializer = new Serializer($normalizers);
     }
 
     /**
-     * @param null $mode
+     * @param string|null $mode
      *
      * @return array
      * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface

@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Wizaplace\Test\CollectionDiff;
 
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
 use Wizaplace\CollectionDiff\CollectionDiff;
 
 class CollectionDiffTest extends TestCase
@@ -47,7 +48,7 @@ class CollectionDiffTest extends TestCase
             ],
         ];
 
-        $collectionUpdater = new CollectionDiff(['name', 'category'], $from, $to, ['defaultCompare' => 'compare']);
+        $collectionUpdater = new CollectionDiff([new PropertyNormalizer()], ['name', 'category'], $from, $to, ['defaultCompare' => 'compare']);
 
         $this->assertCount(1, $collectionUpdater->getNothing(), "[getNothing] should be equal to 1");
         $this->assertSame($from[1], $collectionUpdater->getNothing()[0]['newValues'], "[getNothing] is not equal to [from_1][newValues]");
@@ -100,7 +101,7 @@ class CollectionDiffTest extends TestCase
             ],
         ];
 
-        $collectionUpdater = new CollectionDiff(['name', 'category'], $from, $to);
+        $collectionUpdater = new CollectionDiff([new PropertyNormalizer()], ['name', 'category'], $from, $to);
 
         $this->assertCount(1, $collectionUpdater->getNothing(), "[getNothing] should be equal to 1");
         $this->assertSame($from[1], $collectionUpdater->getNothing()[0], "[getNothing] is not equal to [from_1]");

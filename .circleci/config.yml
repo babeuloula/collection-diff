@@ -1,0 +1,60 @@
+version: 2.1
+commands:
+    test:
+        parameters:
+            test:
+                type: string
+        steps:
+            - run:
+                name: Install make
+                command: apk add make
+            - run:
+                name: Download composer
+                command: |
+                    curl --location https://getcomposer.org/composer.phar -o /usr/local/bin/composer
+                    chmod +x /usr/local/bin/composer
+            - run:
+                name: Install composer
+                command: composer install --ignore-platform-reqs --no-interaction --no-progress --no-scripts
+            - run:
+                name: Run make << parameters.test >>
+                command: make << parameters.test >>
+
+jobs:
+    phpcs:
+        docker:
+            - image: php:7.2-cli-alpine
+        working_directory: ~/repo
+        steps:
+            - checkout
+            - test:
+                 test: cs
+
+    phpstan:
+        docker:
+            - image: php:7.2-cli-alpine
+        working_directory: ~/repo
+        steps:
+            - checkout
+            - test:
+                 test: stan
+
+    phpunit:
+        docker:
+            - image: php:7.2-cli-alpine
+        working_directory: ~/repo
+        steps:
+            - checkout
+            - test:
+                 test: unit
+
+workflows:
+    version: 2.1
+    commit:
+        jobs:
+            - phpcs
+            - phpstan
+            - phpunit:
+                  requires:
+                      - phpcs
+                      - phpstan
