@@ -9,8 +9,10 @@ declare(strict_types=1);
 
 namespace Wizaplace\CollectionDiff;
 
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
 use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\SerializerInterface;
 
 class CollectionDiff
 {
@@ -36,7 +38,7 @@ class CollectionDiff
         'defaultCompare' => 'todo',
     ];
 
-    /** @var Serializer */
+    /** @var SerializerInterface */
     private $serializer;
 
     /** @var bool */
@@ -59,7 +61,6 @@ class CollectionDiff
 
         $this->options = array_merge($this->options, $options);
 
-        // TODO inject serializer
         $this->serializer = new Serializer([new PropertyNormalizer()]);
     }
 
@@ -116,6 +117,18 @@ class CollectionDiff
     public function getDelete(): array
     {
         return $this->getQueries(static::DELETE);
+    }
+
+    /**
+     * @param NormalizerInterface[] $normalizers
+     *
+     * @return CollectionDiff
+     */
+    public function setNormalizers(array $normalizers): CollectionDiff
+    {
+        $this->serializer = new Serializer($normalizers);
+
+        return $this;
     }
 
     /**

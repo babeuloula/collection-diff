@@ -1,6 +1,6 @@
 {
     "name": "wizaplace/collection-diff",
-    "description": "",
+    "description": "Collection Diff allows you to compare 2 arrays (of arrays or objects) to see if you should make INSERT, UPDATE or DELETE in your SQL tables.",
     "type": "library",
     "homepage": "https://github.com/wizaplace/collection-diff",
     "require": {
