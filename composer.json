@@ -1,17 +1,17 @@
 {
     "name": "wizaplace/collection-diff",
-    "description": "CollectionDiff allows you to compare 2 data collections to find operations to do: INSERT, UPDATE or DELETE data.",
+    "description": "Collection Diff allows you to compare 2 data collections to find operations to do: CREATE, UPDATE or DELETE data.",
     "type": "library",
     "homepage": "https://github.com/wizaplace/collection-diff",
     "require": {
         "php": "^7.1",
-        "symfony/serializer": "^4.2"
+        "symfony/serializer": "^2.7||^3.0||^4.0"
     },
-    "require-dev": {
-        "friendsofphp/php-cs-fixer": "^2.14",
-        "phpstan/phpstan": "^0.11.2",
-        "phpunit/phpunit": "^8.0",
-        "tracy/tracy": "^2.6"
+    "suggest": {
+        "symfony/framework-bundle": "Needed to use Collection Diff's bridge",
+        "friendsofphp/php-cs-fixer": "Needed for syntax ^2.14",
+        "phpstan/phpstan": "Needed for syntax ^0.11.2",
+        "phpunit/phpunit": "Needed for tests ^8.0"
     },
     "license": "MIT",
     "authors": [

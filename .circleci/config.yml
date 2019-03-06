@@ -14,7 +14,11 @@ commands:
                     chmod +x /usr/local/bin/composer
             - run:
                 name: Install composer
-                command: composer install --no-interaction --no-progress
+                command: |
+                    composer install --no-interaction --no-progress
+                    composer require --dev friendsofphp/php-cs-fixer ^2.14
+                    composer require --dev phpstan/phpstan ^0.11.2
+                    composer require --dev phpunit/phpunit ^8.0
 
 jobs:
     phpcs:

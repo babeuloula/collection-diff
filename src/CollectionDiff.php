@@ -10,218 +10,157 @@ declare(strict_types=1);
 namespace Wizaplace\CollectionDiff;
 
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use Wizaplace\CollectionDiff\Exception\CollectionDiffException;
 
 class CollectionDiff
 {
-    public const NOTHING = "nothing";
-    public const INSERT  = "insert";
-    public const UPDATE  = "update";
-    public const DELETE  = "delete";
+    public const ACTION_NOTHING = 1;
+    public const ACTION_CREATE = 2;
+    public const ACTION_UPDATE = 3;
+    public const ACTION_DELETE = 4;
 
-    /** @var array */
-    private $queries = [];
-
-    /** @var array */
-    private $primaryKeys;
-
-    /** @var array */
-    private $from;
-    /** @var array */
-    private $to;
-
-    /** @var array */
-    private $options = [
-        'compareStrict'  => true,
-        'defaultCompare' => 'todo',
+    protected $actions = [
+        self::ACTION_NOTHING => [],
+        self::ACTION_CREATE  => [],
+        self::ACTION_UPDATE  => [],
+        self::ACTION_DELETE  => [],
     ];
+    protected $primaryKeys = [];
+    protected $from = [];
+    protected $to = [];
 
     /** @var NormalizerInterface */
-    private $normalizer;
+    protected $normalizer;
 
-    /** @var bool */
-    private $isAlreadyCompared = false;
-
-    /**
-     * @param NormalizerInterface $normalizer
-     * @param string|array        $primaryKeys
-     * @param array               $from
-     * @param array               $to
-     * @param array               $options
-     */
-    public function __construct(NormalizerInterface $normalizer, $primaryKeys, array $from, array $to, array $options = [])
+    public function __construct(NormalizerInterface $normalizer)
     {
-        $this->resetQueries();
-
-        $this->primaryKeys = (true === is_string($primaryKeys)) ? [$primaryKeys] : $primaryKeys;
-
-        $this->from = $from;
-        $this->to   = $to;
-
-        $this->options = array_merge($this->options, $options);
-
         $this->normalizer = $normalizer;
     }
 
-    /**
-     * @param string|null $mode
-     *
-     * @return array
-     * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
-     */
-    public function getQueries($mode = null): array
+    public function compare(array $primaryKeys, array $from, array $to, bool $addOldValues = false, bool $strictComparison = true): self
     {
-        if (false === $this->isAlreadyCompared) {
-            $this->{$this->options['defaultCompare']}();
-        }
+        $this->resetActions();
 
-        if (!is_null($mode) && array_key_exists($mode, $this->queries)) {
-            return $this->queries[$mode];
-        }
+        $this->primaryKeys = $primaryKeys;
 
-        return $this->queries;
+        $this->from = $from;
+        $this->to = $to;
+
+        $this->doCompare($addOldValues, $strictComparison);
+
+        return $this;
     }
 
-    /**
-     * @return array
-     * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
-     */
+    public function getActions(int $action = null): array
+    {
+        if (false === is_null($action)) {
+            if (false === array_key_exists($action, $this->actions)) {
+                throw new CollectionDiffException("Unable to find this action.");
+            }
+
+            return $this->actions[$action];
+        }
+
+        return $this->actions;
+    }
+
     public function getNothing(): array
     {
-        return $this->getQueries(static::NOTHING);
+        return $this->getActions(static::ACTION_NOTHING);
     }
 
-    /**
-     * @return array
-     * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
-     */
-    public function getInsert(): array
+    public function getCreate(): array
     {
-        return $this->getQueries(static::INSERT);
+        return $this->getActions(static::ACTION_CREATE);
     }
 
-    /**
-     * @return array
-     * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
-     */
     public function getUpdate(): array
     {
-        return $this->getQueries(static::UPDATE);
+        return $this->getActions(static::ACTION_UPDATE);
     }
 
-    /**
-     * @return array
-     * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
-     */
     public function getDelete(): array
     {
-        return $this->getQueries(static::DELETE);
+        return $this->getActions(static::ACTION_DELETE);
     }
 
-    /**
-     * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
-     */
-    private function compare(): void
+    protected function doCompare(bool $addOldValues, bool $strictComparison): void
     {
-        if (false === $this->isAlreadyCompared) {
-            foreach ($this->to as $key => $values) {
-                $from = $this->from[$key];
+        foreach ($this->to as $key => $values) {
+            $from = $this->from[$key];
 
-                if (array_key_exists($key, $this->from)) {
-                    /** @var array $normalizeValues */
-                    $normalizeValues = $this->normalizer->normalize($values);
-                    /** @var array $normalizeFrom */
-                    $normalizeFrom   = $this->normalizer->normalize($from);
+            if (true === array_key_exists($key, $this->from)) {
+                /** @var array $normalizeValues */
+                $normalizeValues = $this->normalizer->normalize($values);
+                /** @var array $normalizeFrom */
+                $normalizeFrom   = $this->normalizer->normalize($from);
 
-                    $action = static::NOTHING;
-                    foreach ($this->primaryKeys as $primaryKey) {
-                        if (
-                            false === array_key_exists($primaryKey, $normalizeValues) ||
-                            false === array_key_exists($primaryKey, $normalizeFrom)
-                        ) {
-                            continue;
-                        }
+                $action = static::ACTION_NOTHING;
+                foreach ($this->primaryKeys as $primaryKey) {
+                    if (
+                        false === array_key_exists($primaryKey, $normalizeValues) ||
+                        false === array_key_exists($primaryKey, $normalizeFrom)
+                    ) {
+                        continue;
+                    }
 
-                        if (
-                            (
-                                true === $this->options['compareStrict'] &&
-                                $normalizeValues[$primaryKey] === $normalizeFrom[$primaryKey]
-                            ) ||
-                            (
-                                false === $this->options['compareStrict'] &&
-                                $normalizeValues[$primaryKey] == $normalizeFrom[$primaryKey]
-                            )
-                        ) {
-                            foreach ($normalizeValues as $k => $v) {
-                                if (false === array_key_exists($k, $normalizeFrom) || $v !== $normalizeFrom[$k]) {
-                                    $action = static::UPDATE;
+                    if (
+                        (
+                            true === $strictComparison &&
+                            $normalizeValues[$primaryKey] === $normalizeFrom[$primaryKey]
+                        ) ||
+                        (
+                            false === $strictComparison &&
+                            $normalizeValues[$primaryKey] == $normalizeFrom[$primaryKey]
+                        )
+                    ) {
+                        foreach ($normalizeValues as $k => $v) {
+                            if (false === array_key_exists($k, $normalizeFrom) || $v !== $normalizeFrom[$k]) {
+                                $action = static::ACTION_UPDATE;
 
-                                    $this->add(static::UPDATE, $values, $from);
-                                    break;
-                                }
-                            }
-
-                            if (static::NOTHING !== $action) {
+                                $this->add(static::ACTION_UPDATE, $values, $from, $addOldValues);
                                 break;
                             }
-                        } else {
-                            $action = static::DELETE;
+                        }
 
-                            $this->add(static::DELETE, $from);
-                            $this->add(static::INSERT, $values, $from);
-
+                        if (static::ACTION_NOTHING !== $action) {
                             break;
                         }
-                    }
+                    } else {
+                        $action = static::ACTION_DELETE;
 
-                    if (static::NOTHING === $action) {
-                        $this->add(static::NOTHING, $from);
+                        $this->add(static::ACTION_DELETE, $from, null, $addOldValues);
+                        $this->add(static::ACTION_CREATE, $values, $from, $addOldValues);
+
+                        break;
                     }
-                } else {
-                    $this->add(static::INSERT, $values);
                 }
 
+                if (static::ACTION_NOTHING === $action) {
+                    $this->add(static::ACTION_NOTHING, $from, null, $addOldValues);
+                }
+            } else {
+                $this->add(static::ACTION_CREATE, $values, null, $addOldValues);
+            }
+
+            unset($this->from[$key]);
+        }
+
+        if (count($this->from) > 0) {
+            foreach ($this->from as $key => $from) {
+                $this->add(static::ACTION_DELETE, $from, null, $addOldValues);
                 unset($this->from[$key]);
             }
-
-            if (count($this->from) > 0) {
-                foreach ($this->from as $key => $from) {
-                    $this->add(static::DELETE, $from);
-                    unset($this->from[$key]);
-                }
-            }
-
-            $this->isAlreadyCompared = true;
         }
     }
 
     /**
-     * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
+     * @param mixed      $newValues
+     * @param mixed|null $oldValues
      */
-    private function todo(): void
+    protected function add(int $action, $newValues, $oldValues = null, bool $addOldValues = false): void
     {
-        if (false === $this->isAlreadyCompared) {
-            $this->compare();
-        }
-
-        $queries = $this->getQueries();
-        $this->resetQueries();
-
-        foreach ($queries as $mode => $data) {
-            foreach ($data as $values) {
-                $this->add($mode, $values['newValues'], null, 'todo');
-            }
-        }
-    }
-
-    /**
-     * @param string $mode
-     * @param mixed  $newValues
-     * @param mixed  $oldValues
-     * @param string $method
-     */
-    private function add($mode, $newValues, $oldValues = null, string $method = 'compare'): void
-    {
-        if ('compare' === $method) {
+        if (true === $addOldValues) {
             $data = [
                 'newValues' => $newValues,
             ];
@@ -233,16 +172,16 @@ class CollectionDiff
             $data = $newValues;
         }
 
-        $this->queries[$mode][] = $data;
+        $this->actions[$action][] = $data;
     }
 
-    private function resetQueries(): void
+    protected function resetActions(): void
     {
-        $this->queries = [
-            static::NOTHING => [],
-            static::INSERT  => [],
-            static::UPDATE  => [],
-            static::DELETE  => [],
+        $this->actions = [
+            static::ACTION_NOTHING => [],
+            static::ACTION_CREATE  => [],
+            static::ACTION_UPDATE  => [],
+            static::ACTION_DELETE  => [],
         ];
     }
 }

@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace Wizaplace\Test\CollectionDiff;
 
-class RandomObject
+class FooObject
 {
     /** @var string */
     private $name;
