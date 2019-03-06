@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace Wizaplace\CollectionDiff;
 
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
-use Symfony\Component\Serializer\Serializer;
 
 class CollectionDiff
 {
@@ -36,20 +35,20 @@ class CollectionDiff
         'defaultCompare' => 'todo',
     ];
 
-    /** @var Serializer */
-    private $serializer;
+    /** @var NormalizerInterface */
+    private $normalizer;
 
     /** @var bool */
     private $isAlreadyCompared = false;
 
     /**
-     * @param NormalizerInterface[] $normalizers
-     * @param string|array          $primaryKeys
-     * @param array                 $from
-     * @param array                 $to
-     * @param array                 $options
+     * @param NormalizerInterface $normalizer
+     * @param string|array        $primaryKeys
+     * @param array               $from
+     * @param array               $to
+     * @param array               $options
      */
-    public function __construct(array $normalizers, $primaryKeys, array $from, array $to, array $options = [])
+    public function __construct(NormalizerInterface $normalizer, $primaryKeys, array $from, array $to, array $options = [])
     {
         $this->resetQueries();
 
@@ -60,7 +59,7 @@ class CollectionDiff
 
         $this->options = array_merge($this->options, $options);
 
-        $this->serializer = new Serializer($normalizers);
+        $this->normalizer = $normalizer;
     }
 
     /**
@@ -119,18 +118,6 @@ class CollectionDiff
     }
 
     /**
-     * @param NormalizerInterface[] $normalizers
-     *
-     * @return CollectionDiff
-     */
-    public function setNormalizers(array $normalizers): CollectionDiff
-    {
-        $this->serializer = new Serializer($normalizers);
-
-        return $this;
-    }
-
-    /**
      * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
      */
     private function compare(): void
@@ -141,9 +128,9 @@ class CollectionDiff
 
                 if (array_key_exists($key, $this->from)) {
                     /** @var array $normalizeValues */
-                    $normalizeValues = $this->serializer->normalize($values);
+                    $normalizeValues = $this->normalizer->normalize($values);
                     /** @var array $normalizeFrom */
-                    $normalizeFrom   = $this->serializer->normalize($from);
+                    $normalizeFrom   = $this->normalizer->normalize($from);
 
                     $action = static::NOTHING;
                     foreach ($this->primaryKeys as $primaryKey) {

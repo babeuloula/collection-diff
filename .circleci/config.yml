@@ -1,13 +1,12 @@
 version: 2.1
 commands:
-    test:
-        parameters:
-            test:
-                type: string
+    install_make:
         steps:
             - run:
                 name: Install make
                 command: apk add make
+    composer_install:
+        steps:
             - run:
                 name: Download composer
                 command: |
@@ -15,10 +14,7 @@ commands:
                     chmod +x /usr/local/bin/composer
             - run:
                 name: Install composer
-                command: composer install --ignore-platform-reqs --no-interaction --no-progress --no-scripts
-            - run:
-                name: Run make << parameters.test >>
-                command: make << parameters.test >>
+                command: composer install --no-interaction --no-progress
 
 jobs:
     phpcs:
@@ -27,8 +23,9 @@ jobs:
         working_directory: ~/repo
         steps:
             - checkout
-            - test:
-                 test: cs
+            - install_make
+            - composer_install
+            - run: make cs
 
     phpstan:
         docker:
@@ -36,8 +33,9 @@ jobs:
         working_directory: ~/repo
         steps:
             - checkout
-            - test:
-                 test: stan
+            - install_make
+            - composer_install
+            - run: make stan
 
     phpunit:
         docker:
@@ -45,8 +43,9 @@ jobs:
         working_directory: ~/repo
         steps:
             - checkout
-            - test:
-                 test: unit
+            - install_make
+            - composer_install
+            - run: make unit
 
 workflows:
     version: 2.1
@@ -54,7 +53,4 @@ workflows:
         jobs:
             - phpcs
             - phpstan
-            - phpunit:
-                  requires:
-                      - phpcs
-                      - phpstan
+            - phpunit

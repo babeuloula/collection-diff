@@ -54,9 +54,9 @@ $to = [
     ],
 ];
 
-$collectionDiff = new \Wizaplace\CollectionDiff\CollectionDiff([
-   new RandomNormalizer(),
-   new AnOtherNormalizer(),
+$collectionDiff = new Wizaplace\CollectionDiff\CollectionDiff([
+   new FooNormalizer(),
+   new BarNormalizer(),
 ], ['name', 'category'], $from, $to);
 
 $collectionDiff->getQueries();

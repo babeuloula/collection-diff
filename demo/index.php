@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 require __DIR__.'/../vendor/autoload.php';
 
+use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
+use Symfony\Component\Serializer\Serializer;
 use Tracy\Debugger;
 use Wizaplace\CollectionDiff\CollectionDiff;
 use Wizaplace\Test\CollectionDiff\RandomObject;
@@ -52,5 +54,7 @@ $to = [
     ],
 ];
 
-$collectionDiff = new CollectionDiff(['name', 'category'], $from, $to);
+$serializer = new Serializer([new PropertyNormalizer()]);
+
+$collectionDiff = new CollectionDiff($serializer, ['name', 'category'], $from, $to);
 dump($collectionDiff->getQueries());
