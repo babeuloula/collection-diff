@@ -4,7 +4,7 @@ Collection Diff allows you to compare 2 data collections to find operations to d
 
 ## Requirements
 
-- PHP 7.1
+- ^ PHP 7.1
 
 ## Installation
 
@@ -14,12 +14,12 @@ composer install wizaplace/collection-diff
 
 ## Usage
 
-If you wan to compare data between database and form (like $_POST) 
+If you want to compare data between database and form (like $_POST) 
 
 ```php
 <?php
 
-// From your database
+// Collection from your database
 $from = [
     new FooObject("foo", "category1", 10.5),
     new FooObject("bar2", "category2", 9.5),
@@ -28,7 +28,7 @@ $from = [
     new FooObject("barFooBar", "category1", 9.5),
 ];
 
-// From you form like $_POST
+// Collection from you form like $_POST
 $to = [
     [
         "name" => "foo",
@@ -53,7 +53,7 @@ $to = [
 ];
 ```
 
-You need to call `CollectionDiff::compare` to execute the comparison then call `CollectionDiff::getActions` to retrive
+You need to call `CollectionDiff::compare` to execute the comparison then call `CollectionDiff::getActions` to retrieve
 actions.
 
 `CollectionDiff::compare` first parameter is an array of primary keys needed by Collection Diff to execute the
@@ -92,7 +92,7 @@ $collectionDiff->getUpdate();
 $collectionDiff->getDelete();
 ``` 
 
-### Results
+### Return the following results
 
 ```
 array (size=4)
