@@ -4,7 +4,7 @@ Collection Diff allows you to compare 2 data collections to find operations to d
 
 ## Requirements
 
-- ^ PHP 7.1
+- PHP ^7.1
 
 ## Installation
 
