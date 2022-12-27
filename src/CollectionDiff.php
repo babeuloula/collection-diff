@@ -87,9 +87,9 @@ class CollectionDiff
     protected function doCompare(bool $addOldValues, bool $strictComparison): void
     {
         foreach ($this->to as $key => $values) {
-            $from = $this->from[$key];
-
             if (true === array_key_exists($key, $this->from)) {
+                $from = $this->from[$key];
+
                 /** @var array $normalizeValues */
                 $normalizeValues = $this->normalizer->normalize($values);
                 /** @var array $normalizeFrom */
@@ -139,11 +139,11 @@ class CollectionDiff
                 if (static::ACTION_NOTHING === $action) {
                     $this->add(static::ACTION_NOTHING, $from, null, $addOldValues);
                 }
+
+                unset($this->from[$key]);
             } else {
                 $this->add(static::ACTION_CREATE, $values, null, $addOldValues);
             }
-
-            unset($this->from[$key]);
         }
 
         if (count($this->from) > 0) {
