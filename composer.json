@@ -4,7 +4,7 @@
     "type": "library",
     "homepage": "https://github.com/wizaplace/collection-diff",
     "require": {
-        "php": "^7.1",
+        "php": "^7.1|",
         "symfony/serializer": "^2.7||^3.0||^4.0"
     },
     "require-dev": {
