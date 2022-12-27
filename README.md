@@ -9,7 +9,7 @@ Collection Diff allows you to compare 2 data collections to find operations to d
 ## Installation
 
 ```
-composer install wizaplace/collection-diff
+composer install babeuloula/collection-diff
 ```
 
 ## Usage
