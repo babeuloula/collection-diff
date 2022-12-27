@@ -91,9 +91,9 @@ class CollectionDiff
                 $from = $this->from[$key];
 
                 /** @var array $normalizeValues */
-                $normalizeValues = $this->normalizer->normalize($values);
+                $normalizeValues = $this->normalizer->normalize($values, null, [ 'groups' => [ 'collection-diff' ] ]);
                 /** @var array $normalizeFrom */
-                $normalizeFrom   = $this->normalizer->normalize($from);
+                $normalizeFrom   = $this->normalizer->normalize($from, null, [ 'groups' => [ 'collection-diff' ] ]);
 
                 $action = static::ACTION_NOTHING;
                 foreach ($this->primaryKeys as $primaryKey) {
